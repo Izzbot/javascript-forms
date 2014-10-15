@@ -11,7 +11,37 @@
 * and add an event listener for the form's submit event
 * */
 function onReady() {
-    var standings = ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Super Senior!'];
+    var standings = [
+        {
+            code: 'FR', displayText: 'Freshman'
+        },
+        {
+            code: 'SO', displayText: 'Sophomore'
+        },
+        {
+            code: 'JN', displayText: 'Junior'
+        },
+        {
+            code: 'SN', displayText: 'Senior'
+        },
+        {
+            code: 'SS', displayText: 'Super Senior!'
+        }
+    ];
+
+    var personForm = document.getElementById('person-form');
+    var standingsSelect = personForm.elements['standing'];
+    var i;
+    var option;
+
+    for (i = 0; i < standings.length; i++) {
+        option = document.createElement('option');
+        option.innerHTML = standings[i].displayText;
+        option.value = standings[i].code;
+        standingsSelect.appendChild(option);
+    }
+
+    personForm.addEventListener('submit', onSubmit);
 
 } //onReady()
 
@@ -22,10 +52,12 @@ function onReady() {
  * Also the keyword 'this' will refer to the form that is being submitted while inside this function.
  * */
 function onSubmit(evt) {
-    if (evt.preventDefault) {
+    evt.returnValue = validateForm(this);
+
+    if (!evt.returnValue && evt.preventDefault) {
         evt.preventDefault();
     }
-    evt.returnValue = validateForm(this);
+
     return evt.returnValue;
 } //onSubmit()
 
@@ -38,7 +70,20 @@ function onSubmit(evt) {
 * */
 function validateForm(form) {
     var requiredFields = ['firstName', 'lastName', 'standing', 'age'];
+    var i;
+    var valid = true;
 
+    for (i = 0; i < requiredFields.length; i++){
+        valid &= validateRequiredField(form.elements[requiredFields[i]]);
+    }
+
+    if (!valid) {
+        var errorMsg = document.getElementById('error-message');
+        errorMsg.innerHTML = 'Please fix your errors!';
+        errorMsg.style.display = 'block';
+    }
+
+    return valid;
 } //validateForm()
 
 /* validateRequiredField()
@@ -46,7 +91,16 @@ function validateForm(form) {
 * it will mark the field as invalid and return false. Otherwise it will return true.
 * */
 function validateRequiredField(field) {
+    var value = field.value.trim();
+    var valid = value.length > 0;
 
+    if (valid) {
+        field.className = 'form-control';
+    } else {
+        field.className = 'form-control invalid-field';
+    }
+
+    return valid;
 } //validateRequiredField()
 
 document.addEventListener('DOMContentLoaded', onReady);
